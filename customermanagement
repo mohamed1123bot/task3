@@ -1,0 +1,56 @@
+package org.example.customermanagement;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/customers")
+
+public class customercontroller {
+    private List<Customer> customers = new ArrayList<>();
+    private Long idCounter = 1L;
+
+    @GetMapping
+    public List<Customer> getAll() {
+        return customers;
+    }
+
+    @GetMapping("/{id}")
+    public Customer getById(@PathVariable Long id) {
+        return customers.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    @PostMapping
+    public Customer add(@RequestBody Customer customer) {
+        customer.setId(idCounter++);
+        customers.add(customer);
+        return customer;
+    }
+
+    @PutMapping("/{id}")
+    public Customer update(@PathVariable Long id, @RequestBody Customer updated) {
+        for (Customer c : customers) {
+            if (c.getId().equals(id)) {
+                c.setName(updated.getName());
+                c.setEmail(updated.getEmail());
+                return c;
+            }
+        }
+        return null;
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        customers.removeIf(c -> c.getId().equals(id));
+    }
+
+    @GetMapping("/filter")
+    public List<Customer> filterByName(@RequestParam String name) {
+        return customers.stream()
+                .filter(c -> c.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+}
+
+    }
